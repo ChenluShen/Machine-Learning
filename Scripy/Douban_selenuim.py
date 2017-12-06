@@ -12,16 +12,19 @@ import re
 import sys
 
 # 设置自己的文件路径
-project_loc = "*****************"
+project_loc = "C:/Users/clshe/Documents/Python Scripts"
 
 os.chdir(project_loc)
 if not os.path.exists('./output'):
     os.makedirs('./output')
 
 url = "https://movie.douban.com/"
-# keyword = '鹿晗'
+keyword = '章子怡'
 
-keyword = sys.argv[1]
+chromedriver = "C:/Users/clshe/AppData/Local/Google/Chrome/Application/chromedriver"
+os.environ["webdriver.chrome.driver"] = chromedriver
+
+#keyword = sys.argv[1]
 
 movie_results = {'name':[],
                  'year':[],
@@ -33,7 +36,7 @@ browser = webdriver.Chrome()
 # 输入网址
 browser.get(url)
 
-time.sleep(5)
+time.sleep(5)  #延迟时间，避免过快
 
 browser.find_element_by_name('search_text').send_keys(keyword)
 
@@ -42,7 +45,7 @@ browser.find_element_by_name('search_text').send_keys(Keys.ENTER)
 movielists = browser.find_elements_by_class_name('sc-bZQynM')
 
 def MovieDataFunc(movielists):
-    for i in range(len(movielists))
+    for i in range(len(movielists)):
         movie = movielists[i]
         
         # 解析网页
@@ -89,6 +92,6 @@ for i in range(remain_page_num):
 # 关闭浏览器    
 browser.close()
 # 导出结果文件
-movie_results.to_csv(project_loc+'output/'+keyword+'_movie.results.csv',index=False)
+movie_results.to_csv(project_loc+'/output/'+keyword+'_movie.results.csv',index=False)
 
 
