@@ -2,16 +2,16 @@
 ==== 
  Selenium常见元素定位方法和操作的学习介绍
  ------- 
- http://blog.csdn.net/eastmount/article/details/48108259
-#一. 定位元素方法
-find_element_by_id
-find_element_by_name
-find_element_by_xpath
-find_element_by_link_text
-find_element_by_partial_link_text
-find_element_by_tag_name
-find_element_by_class_name
-find_element_by_css_selector
+ http://blog.csdn.net/eastmount/article/details/48108259<br>
+#一. 定位元素方法<br>
+find_element_by_id<br>
+find_element_by_name<br>
+find_element_by_xpath<br>
+find_element_by_link_text<br>
+find_element_by_partial_link_text<br>
+find_element_by_tag_name<br>
+find_element_by_class_name<br>
+find_element_by_css_selector<br>
 #下面是查找多个元素（这些方法将返回一个列表）：
 find_elements_by_name
 find_elements_by_xpath
