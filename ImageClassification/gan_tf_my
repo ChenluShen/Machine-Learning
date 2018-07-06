@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import time
+import pandas as pd
 
 
 def xavier_init(size):
@@ -92,9 +93,8 @@ G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
 mb_size = 128
 Z_dim = 100
 
-data_path = os.path.join('.', 'MNIST_data')
-print(data_path)
-mnist = input_data.read_data_sets(data_path, one_hot=True)
+# data_path = os.path.join('.', 'MNIST_data')
+mnist = input_data.read_data_sets('./MNIST_data', one_hot=True)
 
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
@@ -134,3 +134,8 @@ for it in range(1000000):
 print()
 plt.plot(list(range(0, 1000000, 1000)), Dloss, Gloss)
 plt.show()
+
+df = pd.DataFrame(columns = ['Dloss','Gloss'], index=None)
+df.Dloss = Dloss
+df.Gloss = Gloss
+df.to_csv('wgan.csv')
