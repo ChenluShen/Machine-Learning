@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import time
+import pandas as pd
 
 
 mb_size = 32
@@ -93,8 +94,8 @@ clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in theta_D]
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-if not os.path.exists('out_wgan/'):
-    os.makedirs('out_wgan/')
+if not os.path.exists('out/'):
+    os.makedirs('out/')
 
 i = 0
 start_time = time.time()
@@ -119,19 +120,18 @@ for it in range(1000000):
         start_time = end_time
         Dloss.append(D_loss_curr)
         Gloss.append(G_loss_curr)
-        print('Iter: {}; D loss: {:.4}; G_loss: {:.4}; Time: {:.4}'
+        print('Iter: {}; D_loss: {:.4}; G_loss: {:.4}; Time: {:.4}'
               .format(it, D_loss_curr, G_loss_curr, str(timespend)))
 
         if it % 1000 == 0:
             samples = sess.run(G_sample, feed_dict={z: sample_z(16, z_dim)})
 
             fig = plot(samples)
-            plt.savefig('out/{}.png'
-                        .format(str(i).zfill(3)), bbox_inches='tight')
+            plt.savefig('out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
             i += 1
             plt.close(fig)
 
-f = file('wgan', 'w')
+f = open('wgan.txt', 'w')
 for i in range(len(Dloss)):
     f.writelines(str(Dloss[i]))
     f.writelines('\n')
@@ -139,3 +139,9 @@ for j in range(len(Gloss)):
     f.writelines(str(Gloss[j]))
     f.writelines('\n')
 f.close()
+
+df = pd.DataFrame(columns = ['Dloss','Gloss'], index=None)
+df.Dloss = Dloss
+df.Gloss = Gloss
+df.to_csv('wgan.csv')
+
