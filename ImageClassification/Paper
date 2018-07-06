@@ -1,1 +1,28 @@
-TBD
+代码
+wiseodd/generative-models/GAN/wasserstein_gan
+vanilla_gan/
+ppplinday/Multiple-GAN-Tensorflow-Mnist
+
+
+MasazI/gan_basic
+YadiraF/GAN
+sanghoon/tf-exercise-gan
+
+https://arxiv.org/pdf/1406.2661.pdf  GAN原文 
+https://arxiv.org/abs/1701.07875  WGAN原文
+汇聚
+https://github.com/YadiraF/GAN  有原文指引
+
+原理
+http://bamos.github.io/2016/08/09/deep-completion/
+CSDN
+https://blog.csdn.net/just_sort/article/details/79454054
+https://blog.csdn.net/qq_29300341/article/details/78911379
+https://blog.csdn.net/ruotianxia/article/details/78457504
+https://blog.csdn.net/fenmi8378/article/details/74923016
+https://blog.csdn.net/u013709270/article/details/78763056
+
+机器之心 - http://m.neeqm.cn/almosthuman2014/2018-02-18/202643.html
+
+结果
+https://github.com/hiwonjoon/wae-wgan
