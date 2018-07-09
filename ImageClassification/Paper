@@ -1,3 +1,13 @@
+wgan
+令人拍案叫绝的Wasserstein GAN 及代码（WGAN两篇论文的中文详细介绍）
+https://blog.csdn.net/omnispace/article/details/54942668
+https://zhuanlan.zhihu.com/p/25071913
+
+http://lotabout.me/2018/WGAN/
+http://friskit.me/2017/07/10/ntu-gan-wgan/
+https://www.e-learn.cn/content/qita/814071
+https://www.sohu.com/a/132508257_642762
+
 代码
 wiseodd/generative-models/GAN/wasserstein_gan
 vanilla_gan/
