@@ -1,0 +1,178 @@
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import time
+import pandas as pd
+
+mnist = input_data.read_data_sets('./MNIST_data', one_hot=True)
+
+batch_size = 10 #100
+width,height = 28,28
+mnist_dim = width*height
+
+mb_size = 32 #128
+Z_dim = 10 #100
+
+'''
+mb_size = 32 # 每次随机选择mb_size个样本进行训练
+X_dim = 784
+z_dim = 10
+h_dim = 128
+'''
+
+def xavier_init(size):
+    in_dim = size[0]
+    xavier_stddev = 1. / tf.sqrt(in_dim / 2.)
+    return tf.random_normal(shape=size, stddev=xavier_stddev)
+
+
+""" ==================== GENERATOR ======================== """
+
+G_W1 = tf.Variable(xavier_init([10, 128])) #100
+G_b1 = tf.Variable(tf.zeros(shape=[128]))
+
+G_W2 = tf.Variable(xavier_init([128, 784]))
+G_b2 = tf.Variable(tf.zeros(shape=[784]))
+
+theta_G = [G_W1, G_W2, G_b1, G_b2]  # G_variables
+def generator(z):
+    G_h1 = tf.nn.relu(tf.matmul(z, G_W1) + G_b1)
+    G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
+    G_prob = tf.nn.sigmoid(G_log_prob)
+    return G_prob
+""" ==================== DISCRIMINATOR ======================== """
+D_W1 = tf.Variable(xavier_init([784, 128]))
+D_b1 = tf.Variable(tf.zeros(shape=[128]))
+
+D_W2 = tf.Variable(xavier_init([128, 1]))
+D_b2 = tf.Variable(tf.zeros(shape=[1]))
+
+theta_D = [D_W1, D_W2, D_b1, D_b2]  # D_variables
+
+def discriminator(x):
+    D_h1 = tf.nn.relu(tf.matmul(x, D_W1) + D_b1)
+    out = tf.matmul(D_h1, D_W2) + D_b2
+    # wgan 生成器和判别器的loss不取log！
+    # D_logit = tf.matmul(D_h1, D_W2) + D_b2
+    # D_prob = tf.nn.sigmoid(D_logit)
+    return out
+
+def plot(samples):
+    fig = plt.figure(figsize=(4, 4))
+    gs = gridspec.GridSpec(4, 4)
+    gs.update(wspace=0.05, hspace=0.05)
+
+    for i, sample in enumerate(samples):
+        ax = plt.subplot(gs[i])
+        plt.axis('off')
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_aspect('equal')
+        plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
+
+    return fig
+
+def sample_Z(m, n):  # 返回值 shape 为 m x n
+    # 补全代码
+    output = np.random.uniform(-1., 1., size=[m, n])
+    return output
+
+
+def for_D_loss(X, Z):
+    # 补全代码
+    _G_sample = generator(Z)
+    D_real = discriminator(X)
+    D_fake = discriminator(_G_sample)
+    output = tf.reduce_mean(D_real) - tf.reduce_mean(D_fake)
+    return output
+
+
+def for_G_loss(Z):
+    # 补全代码
+    _G_sample = generator(Z)
+    D_fake = discriminator(_G_sample)
+    output = -tf.reduce_mean(D_fake)
+    return output
+
+
+X = tf.placeholder(tf.float32, shape=[None, mnist_dim])
+Z = tf.placeholder(tf.float32, shape=[None, Z_dim])
+
+
+D_loss = for_D_loss(X ,Z)
+G_loss = for_G_loss(Z)
+
+
+D_solver = tf.train.RMSPropOptimizer(2.5e-4).minimize(D_loss, var_list=theta_D)
+G_solver = tf.train.RMSPropOptimizer(1e-3).minimize(G_loss, var_list=theta_G)
+
+
+# c = 100.0
+# 原代码c取100过大，改为0.01
+c = 0.01
+clip_ops = []
+for var in theta_D:
+    clip_bounds = [-c, c]
+    clip_ops.append(tf.assign(var,tf.clip_by_value(var, clip_bounds[0], clip_bounds[1])))
+clip_disc_weights = tf.group(*clip_ops)
+
+G_sample = generator(Z)
+
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+saver = tf.train.Saver()
+
+if not os.path.exists('out/wgan_tf/'):
+    os.makedirs('out/wgan_tf/')
+
+
+i = 0
+K = 1
+start_time = time.time()
+Dloss, Gloss = [], []
+
+for it in range(100000):
+    if it % 1000 == 0:
+        samples = sess.run(G_sample, feed_dict={Z: sample_Z(16, Z_dim)})
+        fig = plot(samples)
+        plt.savefig('out/wgan_tf/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
+        i += 1
+        plt.close(fig)
+
+    for k in range(K):
+        X_mb, _ = mnist.train.next_batch(mb_size)
+        _, D_loss_curr = sess.run([D_solver, D_loss], feed_dict={X: X_mb, Z: sample_Z(mb_size, Z_dim)})
+        _ = sess.run(clip_disc_weights)
+
+    _, G_loss_curr = sess.run([G_solver, G_loss], feed_dict={Z: sample_Z(mb_size, Z_dim)})
+
+    if it % 1000 == 0:
+        end_time = time.time()
+        timespend = end_time - start_time
+        start_time = end_time
+        Dloss.append(D_loss_curr)
+        Gloss.append(G_loss_curr)
+        print('Iter: {}; D_loss: {:.4}; G_loss: {:.4}; Time: {:.4}'
+              .format(it, D_loss_curr, G_loss_curr, str(timespend)))
+
+
+'''
+f = open('wgan.txt', 'w')
+for i in range(len(Dloss)):
+    f.writelines(str(Dloss[i]))
+    f.writelines('\n')
+for j in range(len(Gloss)):
+    f.writelines(str(Gloss[j]))
+    f.writelines('\n')
+f.close()
+'''
+df = pd.DataFrame(columns = ['Dloss','Gloss'], index=None)
+df.Dloss = Dloss
+df.Gloss = Gloss
+df.to_csv('wgan.csv', index=None)
+
+
